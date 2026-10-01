@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Reservation System - College Practical</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <div class="logo-icon">🎫</div>
+                <div class="brand-text">
+                    <h1>Ticket Reservation System</h1>
+                    <span class="subtitle">MySQL Database Practical Demo & Practical Exam Solution</span>
+                </div>
+            </div>
+            <div class="db-status-badge" id="dbStatusBadge">
+                <span class="status-dot pulsing"></span>
+                <span id="dbStatusText">Checking DB Status...</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        
+        <!-- Metrics / Summary Cards -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon icon-blue">📋</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statTotalReservations">0</span>
+                    <span class="stat-label">Total Reservations</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-green">🎟️</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statTotalTickets">0</span>
+                    <span class="stat-label">Total Tickets Booked</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-purple">✈️</div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statActiveRoutes">0</span>
+                    <span class="stat-label">Active Journey Routes</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Notification Toast Box -->
+        <div id="toastNotification" class="toast hidden">
+            <span class="toast-icon" id="toastIcon">ℹ️</span>
+            <span class="toast-message" id="toastMessage">Welcome to Ticket Reservation System</span>
+        </div>
+
+        <!-- Main Layout: Form Card + Table Card -->
+        <div class="content-grid">
+            
+            <!-- Left Panel: Ticket Form Card -->
+            <section class="card form-card">
+                <div class="card-header">
+                    <h2 id="formTitle">Add New Ticket Reservation</h2>
+                    <span class="badge mode-badge" id="formModeBadge">Mode: Create</span>
+                </div>
+
+                <!-- Global Error Box -->
+                <div class="alert alert-error hidden" id="globalErrorBox">
+                    <strong>⚠️ Error:</strong> <span id="globalErrorText">Please resolve validation errors below.</span>
+                </div>
+
+                <form id="reservationForm" novalidate>
+                    <!-- Hidden field for ID (Used during update/search) -->
+                    <input type="hidden" id="reservation_id" name="reservation_id" value="">
+
+                    <!-- Reservation ID Indicator when editing -->
+                    <div class="form-group edit-id-group hidden" id="editIdDisplay">
+                        <label>Editing Reservation ID:</label>
+                        <span class="id-tag" id="editingIdTag">#--</span>
+                    </div>
+
+                    <!-- Passenger Name -->
+                    <div class="form-group">
+                        <label for="passenger_name">Passenger Name <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <span class="field-icon">👤</span>
+                            <input type="text" id="passenger_name" name="passenger_name" placeholder="e.g. Rahul Sharma" autocomplete="off">
+                        </div>
+                        <span class="error-msg" id="err_passenger_name"></span>
+                    </div>
+
+                    <!-- Email & Phone (Grid 2-col) -->
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="email">Email Address <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="field-icon">✉️</span>
+                                <input type="email" id="email" name="email" placeholder="rahul@example.com" autocomplete="off">
+                            </div>
+                            <span class="error-msg" id="err_email"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone Number <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="field-icon">📞</span>
+                                <input type="tel" id="phone" name="phone" placeholder="9876543210" autocomplete="off">
+                            </div>
+                            <span class="error-msg" id="err_phone"></span>
+                        </div>
+                    </div>
+
+                    <!-- Journey Date & Number of Tickets (Grid 2-col) -->
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="journey_date">Journey Date <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="field-icon">📅</span>
+                                <input type="date" id="journey_date" name="journey_date">
+                            </div>
+                            <span class="error-msg" id="err_journey_date"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="number_of_tickets">Number of Tickets <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="field-icon">🎟️</span>
+                                <input type="number" id="number_of_tickets" name="number_of_tickets" min="1" max="20" value="1">
+                            </div>
+                            <span class="error-msg" id="err_number_of_tickets"></span>
+                        </div>
+                    </div>
+
+                    <!-- Source & Destination (Grid 2-col) -->
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="source">Source City <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="field-icon">🛫</span>
+                                <input type="text" id="source" name="source" placeholder="e.g. New Delhi" list="citiesList">
+                            </div>
+                            <span class="error-msg" id="err_source"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="destination">Destination City <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <span class="field-icon">🛬</span>
+                                <input type="text" id="destination" name="destination" placeholder="e.g. Mumbai" list="citiesList">
+                            </div>
+                            <span class="error-msg" id="err_destination"></span>
+                        </div>
+                    </div>
+
+                    <!-- Datalist for common city quick picks -->
+                    <datalist id="citiesList">
+                        <option value="New Delhi"></option>
+                        <option value="Mumbai"></option>
+                        <option value="Bengaluru"></option>
+                        <option value="Chennai"></option>
+                        <option value="Kolkata"></option>
+                        <option value="Hyderabad"></option>
+                        <option value="Pune"></option>
+                        <option value="Ahmedabad"></option>
+                        <option value="Jaipur"></option>
+                        <option value="Chandigarh"></option>
+                    </datalist>
+
+                    <!-- Control Action Buttons (Add, Search, Update, Delete, Reset) -->
+                    <div class="button-group">
+                        <button type="button" class="btn btn-primary" id="btnAdd">
+                            <span class="btn-icon">➕</span> Add
+                        </button>
+                        <button type="button" class="btn btn-info" id="btnSearch">
+                            <span class="btn-icon">🔍</span> Search
+                        </button>
+                        <button type="button" class="btn btn-warning" id="btnUpdate" disabled>
+                            <span class="btn-icon">✏️</span> Update
+                        </button>
+                        <button type="button" class="btn btn-danger" id="btnDelete" disabled>
+                            <span class="btn-icon">🗑️</span> Delete
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="btnReset">
+                            <span class="btn-icon">🔄</span> Reset
+                        </button>
+                    </div>
+
+                </form>
+            </section>
+
+            <!-- Right Panel: Data Table & Live Search Card -->
+            <section class="card table-card">
+                <div class="table-card-header">
+                    <div class="header-left">
+                        <h2>All Reservations</h2>
+                        <span class="badge count-badge" id="recordCountBadge">0 Records</span>
+                    </div>
+
+                    <!-- Live Search Bar -->
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="searchInput" placeholder="Search by ID, Name, City, Email..." autocomplete="off">
+                        <button class="clear-search-btn hidden" id="clearSearchBtn">✕</button>
+                    </div>
+                </div>
+
+                <!-- Table Container with custom scroll -->
+                <div class="table-wrapper">
+                    <table class="reservation-table" id="reservationTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Passenger Name</th>
+                                <th>Contact Details</th>
+                                <th>Journey Date</th>
+                                <th>Route (Source → Destination)</th>
+                                <th>Tickets</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Rows dynamically populated by app.js -->
+                            <tr>
+                                <td colspan="7" class="loading-cell">Loading reservations from MySQL database...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty State View -->
+                <div class="empty-state hidden" id="emptyState">
+                    <div class="empty-icon">📂</div>
+                    <h3>No Reservations Found</h3>
+                    <p id="emptyStateMsg">There are no ticket reservations in the database matching your query.</p>
+                    <button class="btn btn-outline" id="btnEmptyReset">Show All Records</button>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- Confirm Delete Modal Dialog -->
+    <div class="modal-overlay hidden" id="deleteModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>⚠️ Confirm Deletion</h3>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete reservation <strong id="deleteModalId">#--</strong> for <strong id="deleteModalName">--</strong>?</p>
+                <p class="warning-text">This operation will permanently remove the record from the MySQL database.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCancelDelete">Cancel</button>
+                <button class="btn btn-danger" id="btnConfirmDelete">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>Ticket Reservation System &bull; MySQL Database Practical Implementation &bull; Built with Node.js & Express</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
